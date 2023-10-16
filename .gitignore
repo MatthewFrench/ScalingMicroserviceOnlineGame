@@ -1,3 +1,7 @@
 **/.idea/**
 PublicFacingServer/target
 PublicFacingServer/PublicFacingServer.iml
+DatabaseServer/DatabaseServer.iml
+DatabaseServer/target
+WorldInstanceServer/target
+WorldInstanceServer/WorldInstanceServer.iml
