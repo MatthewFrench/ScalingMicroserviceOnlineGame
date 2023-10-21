@@ -3,6 +3,15 @@ This is a scaling microservice online game project. The goal is to be highly sca
 
 ![Current Plan Diagram](./Documents/Current-Plan-Diagram.png "Title")
 
+## General
+We use flatbuffers for communication between client-server and server-server. This is for performance reasons.  
+Install flatbuffers via homebrew `brew install flatbuffers`.  
+Flatbuffer instructions: https://flatbuffers.dev/flatbuffers_guide_using_schema_compiler.html  
+
+### Generate Dart Flatbuffer code
+Run `flatc --dart -o ./Client/lib/generated_flatbuffers ./Flatbuffers/*`  
+This will generate flatbuffer code for all files in the folder.
+
 ## Client
 Written in Flutter, to support desktop/web/mobile.
 Connects via WebRTC and Websocket for quick and reliable data transfer.
