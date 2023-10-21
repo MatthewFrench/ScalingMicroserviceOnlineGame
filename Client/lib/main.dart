@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'generated_flatbuffers//monster_my_game.sample_generated.dart';
 
 void main() {
   runApp(const MyApp());
@@ -65,6 +66,23 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+
+      final MonsterObjectBuilder monsterBuilder = MonsterObjectBuilder(
+          name: "Monster name",
+          inventory: [],
+          weapons: [],
+          equippedType: EquipmentTypeId.Weapon,
+          equipped: null,
+          hp: 5,
+          mana: 10,
+          pos: Vec3ObjectBuilder(x: 1.0, y: 2.0, z: 3.0),
+          color: Color.Red,
+          path: [
+            Vec3ObjectBuilder(x: 1.0, y: 2.0, z: 3.0),
+            Vec3ObjectBuilder(x: 4.0, y: 5.0, z: 6.0)
+          ]);
+
+      _counter = monsterBuilder.toBytes().lengthInBytes;
     });
   }
 

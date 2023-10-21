@@ -12,6 +12,10 @@ Flatbuffer instructions: https://flatbuffers.dev/flatbuffers_guide_using_schema_
 Run `flatc --dart -o ./Client/lib/generated_flatbuffers ./Flatbuffers/*`  
 This will generate flatbuffer code for all files in the folder.
 
+### Generate Rust Flatbuffer code
+Run `flatc --rust -o ./PublicFacingServer/src/generated_flatbuffers ./Flatbuffers/*`  
+This generates the flatbuffer code for the public facing server.
+
 ## Client
 Written in Flutter, to support desktop/web/mobile.
 Connects via WebRTC and Websocket for quick and reliable data transfer.
