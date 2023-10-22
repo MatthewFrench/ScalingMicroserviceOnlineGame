@@ -1,25 +1,14 @@
 use crate::{ws, Client, Clients, Result};
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 use uuid::Uuid;
-use warp::{http::StatusCode, reply::json, ws::Message, Reply};
-
-#[derive(Deserialize, Debug)]
-pub struct RegisterRequest {
-    user_id: usize,
-}
+use warp::{http::StatusCode, reply::json, Reply};
 
 #[derive(Serialize, Debug)]
-pub struct RegisterResponse {
-    url: String,
+pub struct HealthCheckResponse {
+    healthy: bool,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct Event {
-    topic: String,
-    user_id: Option<usize>,
-    message: String,
-}
-
+/*
 pub async fn publish_handler(body: Event, clients: Clients) -> Result<impl Reply> {
     clients
         .read()
@@ -38,41 +27,49 @@ pub async fn publish_handler(body: Event, clients: Clients) -> Result<impl Reply
 
     Ok(StatusCode::OK)
 }
+ */
 
-pub async fn register_handler(body: RegisterRequest, clients: Clients) -> Result<impl Reply> {
-    let user_id = body.user_id;
-    let uuid = Uuid::new_v4().as_simple().to_string();
-
-    register_client(uuid.clone(), user_id, clients).await;
-    Ok(json(&RegisterResponse {
-        url: format!("ws://127.0.0.1:8000/ws/{}", uuid),
-    }))
-}
-
-async fn register_client(id: String, user_id: usize, clients: Clients) {
+async fn register_client(id: String, user_id: String, clients: Clients) {
     clients.write().await.insert(
         id,
         Client {
             user_id,
-            topics: vec![String::from("cats")],
             sender: None,
         },
     );
 }
 
 pub async fn unregister_handler(id: String, clients: Clients) -> Result<impl Reply> {
+    // Todo: Put unregistering in the right place
     clients.write().await.remove(&id);
     Ok(StatusCode::OK)
 }
 
-pub async fn ws_handler(ws: warp::ws::Ws, id: String, clients: Clients) -> Result<impl Reply> {
-    let client = clients.read().await.get(&id).cloned();
-    match client {
-        Some(c) => Ok(ws.on_upgrade(move |socket| ws::client_connection(socket, id, clients, c))),
-        None => Err(warp::reject::not_found()),
+pub async fn ws_handler(ws: warp::ws::Ws, clients: Clients) -> Result<impl Reply> {
+    let mut client_write_lock = clients.write().await;
+
+    // Regenerate UUID to make sure it isn't taken
+    let mut uuid = Uuid::new_v4().as_simple().to_string();
+    while client_write_lock.contains_key(&uuid) {
+        uuid = Uuid::new_v4().as_simple().to_string();
     }
+
+    let client = Client {
+        user_id: uuid.clone(),
+        sender: None,
+    };
+
+    client_write_lock.insert(
+        uuid.clone(),
+        client.clone()
+    );
+    drop(client_write_lock);
+
+    Ok(ws.on_upgrade(move |socket| ws::client_connection(socket, uuid, clients, client.clone())))
 }
 
 pub async fn health_handler() -> Result<impl Reply> {
-    Ok(StatusCode::OK)
+    Ok(json(&HealthCheckResponse {
+        healthy: true,
+    }))
 }
