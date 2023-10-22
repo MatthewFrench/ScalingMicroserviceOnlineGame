@@ -1,7 +1,9 @@
+import 'package:client/app_state.dart';
 import 'package:flutter/material.dart';
 import 'generated_flatbuffers//monster_my_game.sample_generated.dart';
 
 void main() {
+  var appState = AppState();
   runApp(const MyApp());
 }
 
